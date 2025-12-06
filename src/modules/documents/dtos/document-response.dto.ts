@@ -93,7 +93,22 @@ export class DocumentResponseDto {
   updatedAt: Date;
 
   constructor(partial: Partial<DocumentResponseDto>) {
-    Object.assign(this, partial);
+    // Convert Mongoose document to plain object if needed
+    const plain = partial && typeof (partial as any).toObject === 'function' 
+      ? (partial as any).toObject() 
+      : partial;
+    
+    this.id = plain.id || plain._id;
+    this.originalName = plain.originalName;
+    this.mimetype = plain.mimetype;
+    this.size = plain.size;
+    this.analysisStatus = plain.analysisStatus;
+    this.extractedText = plain.extractedText;
+    this.summary = plain.summary;
+    this.documentType = plain.documentType;
+    this.extractedMetadata = plain.extractedMetadata;
+    this.createdAt = plain.createdAt;
+    this.updatedAt = plain.updatedAt;
   }
 }
 

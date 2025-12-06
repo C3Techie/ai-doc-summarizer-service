@@ -1,6 +1,6 @@
 # AI Document Summarizer Service
 
-A NestJS-based microservice for document upload, text extraction, and AI-powered analysis using OpenRouter LLM. Built with JWT authentication, UUID-based IDs, and HNG SDK response patterns.
+A NestJS-based microservice for document upload, text extraction, and AI-powered analysis using OpenRouter LLM. Built with JWT authentication and HNG SDK response patterns.
 
 ## Features
 
@@ -9,7 +9,7 @@ A NestJS-based microservice for document upload, text extraction, and AI-powered
 - **AI Analysis**: Use OpenRouter LLM to generate summaries and extract metadata
 - **JWT Authentication**: Secure signup/login with Bearer token authentication
 - **RESTful API**: Clean, well-documented REST endpoints following HNG SDK pattern
-- **MongoDB Storage**: Persistent storage with UUID primary keys
+- **MongoDB Storage**: Persistent storage with MongoDB ObjectId primary keys
 - **Swagger Documentation**: Interactive API documentation at `/docs` with Bearer auth
 
 ## Architecture
@@ -40,7 +40,7 @@ src/
 │   │   │   └── auth.dto.ts              # Signup, Login DTOs
 │   │   ├── docs/
 │   │   │   └── auth.swagger.ts          # Swagger decorators for auth endpoints
-│   │   ├── user.schema.ts               # User Mongoose schema with UUID
+│   │   ├── user.schema.ts               # User Mongoose schema
 │   │   ├── auth.service.ts              # Signup, login, JWT generation
 │   │   ├── auth.controller.ts           # Auth endpoints
 │   │   ├── jwt.strategy.ts              # Passport JWT strategy
@@ -50,7 +50,7 @@ src/
 │   │   ├── dtos/                        # Data Transfer Objects
 │   │   ├── docs/                        # Swagger decorators
 │   │   ├── model-actions/               # Database operations layer
-│   │   ├── document.schema.ts           # Mongoose schema with UUID
+│   │   ├── document.schema.ts           # Mongoose schema
 │   │   ├── documents.service.ts         # Business logic
 │   │   ├── documents.controller.ts      # API endpoints (JWT protected)
 │   │   └── documents.module.ts          # Module configuration
@@ -69,7 +69,7 @@ src/
 ### Key Patterns
 
 1. **HNG SDK Response Format**: All responses wrapped in `{message: string, data: T}`
-2. **UUID Primary Keys**: Documents and users use UUID v4 instead of MongoDB ObjectId
+2. **MongoDB ObjectId**: Documents and users use MongoDB's native ObjectId for primary keys
 3. **AbstractModelAction**: Standardized CRUD operations for Mongoose models
 4. **System Messages**: Centralized message constants for consistency
 5. **Service Layer**: Business logic orchestration
@@ -100,7 +100,7 @@ Content-Type: application/json
 {
   "message": "User registered successfully",
   "data": {
-    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "id": "507f1f77bcf86cd799439011",
     "email": "user@example.com",
     "firstName": "John",
     "lastName": "Doe",
@@ -125,7 +125,7 @@ Content-Type: application/json
 {
   "message": "Login successful",
   "data": {
-    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "id": "507f1f77bcf86cd799439011",
     "email": "user@example.com",
     "firstName": "John",
     "lastName": "Doe",
@@ -155,7 +155,7 @@ Content-Type: multipart/form-data
 {
   "message": "Document uploaded successfully",
   "data": {
-    "id": "b2c3d4e5-f6g7-8901-bcde-f12345678901",
+    "id": "507f191e810c19729de860ea",
     "originalName": "invoice.pdf",
     "mimetype": "application/pdf",
     "size": 1024000,
@@ -178,7 +178,7 @@ Authorization: Bearer {token}
 {
   "message": "Analysis completed successfully",
   "data": {
-    "id": "b2c3d4e5-f6g7-8901-bcde-f12345678901",
+    "id": "507f191e810c19729de860ea",
     "analysisStatus": "COMPLETED",
     "summary": "This document is an invoice for services rendered...",
     "documentType": "invoice",
@@ -205,7 +205,7 @@ Authorization: Bearer {token}
 {
   "message": "Document fetched successfully",
   "data": {
-    "id": "b2c3d4e5-f6g7-8901-bcde-f12345678901",
+    "id": "507f191e810c19729de860ea",
     "originalName": "invoice.pdf",
     "mimetype": "application/pdf",
     "size": 1024000,
@@ -233,7 +233,7 @@ Authorization: Bearer {token}
   "message": "Documents fetched successfully",
   "data": [
     {
-      "id": "b2c3d4e5-f6g7-8901-bcde-f12345678901",
+      "id": "507f191e810c19729de860ea",
       "originalName": "invoice.pdf",
       "documentType": "invoice",
       "analysisStatus": "COMPLETED",
@@ -351,8 +351,6 @@ Open browser to `http://localhost:3000/docs`
 
 **pdf-parse** - Converts PDF documents to plain text for analysis. Lightweight library that handles various PDF formats without external dependencies.
 
-**UUID** - Generates universally unique identifiers for documents instead of sequential MongoDB ObjectIds. Ensures better security and follows HNG SDK pattern for distributed systems.
-
 **bcrypt** - Hashes user passwords using industry-standard bcrypt algorithm. Provides secure password storage with configurable salt rounds.
 
 ## Development
@@ -363,7 +361,7 @@ Open browser to `http://localhost:3000/docs`
 - **Services**: Business logic and orchestration
 - **Model Actions**: Database operations (CRUD)
 - **DTOs**: Data validation and transformation
-- **Schemas**: Mongoose models with UUID primary keys
+- **Schemas**: Mongoose models with MongoDB ObjectId
 - **Guards**: JWT authentication protection
 - **Interceptors**: Response transformation and logging
 - **Decorators**: Custom metadata for routes

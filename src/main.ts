@@ -8,8 +8,11 @@ import { ResponseTransformInterceptor } from './common/interceptors/response-tra
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
 async function bootstrap() {
+  console.log('🚀 Bootstrap starting...');
   const app = await NestFactory.create(AppModule);
+  console.log('✅ NestFactory created');
   const configService = app.get(ConfigService);
+  console.log('✅ ConfigService retrieved');
 
   app.enableCors();
 

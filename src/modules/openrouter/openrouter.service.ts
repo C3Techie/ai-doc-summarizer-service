@@ -43,7 +43,12 @@ export class OpenrouterService {
       headers: {
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://github.com/yourusername/ai-doc-summarizer',
+        'X-Title': 'AI Document Summarizer',
       },
+      timeout: 60000, // 60 second timeout
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
     });
 
     // Use a free/low-cost model
@@ -85,7 +90,18 @@ export class OpenrouterService {
       const response = await this.axiosInstance.post(
         '/chat/completions',
         payload,
+        {
+          validateStatus: (status) => status < 500, // Don't throw on 4xx errors
+        },
       );
+
+      // Check for API errors
+      if (response.status >= 400) {
+        this.logger.error(`OpenRouter API error: ${response.status}`, response.data);
+        throw new InternalServerErrorException(
+          `OpenRouter API error: ${response.data?.error?.message || 'Unknown error'}`,
+        );
+      }
 
       const content = response.data.choices[0]?.message?.content;
       if (!content) {
@@ -107,9 +123,11 @@ export class OpenrouterService {
       this.logger.log(sysMsg.LLM_ANALYSIS_SUCCESS);
       return parsedContent as ILLMAnalysisResult;
     } catch (error) {
-      this.logger.error(
-        `${sysMsg.LLM_ANALYSIS_FAILED}: ${error.response?.data || error.message}`,
-      );
+      const errorMsg = error.code === 'ECONNRESET' 
+        ? 'Connection to OpenRouter was reset. The document might be too large or the network is unstable.'
+        : error.response?.data?.error?.message || error.message;
+      
+      this.logger.error(`${sysMsg.LLM_ANALYSIS_FAILED}: ${errorMsg}`);
       throw new InternalServerErrorException(sysMsg.LLM_ANALYSIS_FAILED);
     }
   }

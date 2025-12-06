@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document as MongooseDocument } from 'mongoose';
-import { v4 as uuidv4 } from 'uuid';
 import { ExtractedMetadata } from '../../common/types';
 
 export type DocumentDocument = Document & MongooseDocument;
@@ -55,9 +54,6 @@ export enum DocumentType {
   },
 })
 export class Document {
-  @Prop({ type: String, default: () => uuidv4(), unique: true })
-  _id: string;
-
   @Prop({ required: true })
   originalName: string;
 
