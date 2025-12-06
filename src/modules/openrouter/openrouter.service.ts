@@ -1,0 +1,116 @@
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import axios, { AxiosInstance } from 'axios';
+import * as sysMsg from '../../constants/system.messages';
+import { DocumentType } from '../documents/document.schema';
+import { ExtractedMetadata } from '../../common/types';
+
+/**
+ * Interface for LLM analysis result
+ */
+export interface ILLMAnalysisResult {
+  summary: string;
+  documentType: DocumentType;
+  extractedMetadata: ExtractedMetadata;
+}
+
+/**
+ * Service for interacting with OpenRouter LLM API
+ * Handles document analysis and metadata extraction
+ */
+@Injectable()
+export class OpenrouterService {
+  private readonly logger = new Logger(OpenrouterService.name);
+  private axiosInstance: AxiosInstance;
+  private model: string;
+  private systemPrompt: string;
+
+  constructor(private configService: ConfigService) {
+    const apiKey = this.configService.get<string>('OPENROUTER_API_KEY');
+    if (!apiKey) {
+      this.logger.error(sysMsg.OPENROUTER_API_KEY_MISSING);
+      throw new InternalServerErrorException(
+        sysMsg.OPENROUTER_API_KEY_MISSING,
+      );
+    }
+
+    this.axiosInstance = axios.create({
+      baseURL: 'https://openrouter.ai/api/v1',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    // Use a free/low-cost model
+    this.model = 'openai/gpt-4o-mini';
+
+    // System prompt for structured JSON output
+    this.systemPrompt = `You are an expert AI document analysis and summarization service. Your task is to process the provided document text and extract specific information.
+      The output MUST be a single JSON object that conforms to the following schema:
+      {
+        "summary": "A concise, 3-5 sentence summary of the document.",
+        "documentType": "One of: invoice, CV, report, letter, contract, article, other. Choose the most specific type.",
+        "extractedMetadata": {
+          "date": "The primary date mentioned in the document (YYYY-MM-DD or null)",
+          "sender": "The name or organization that created or sent the document (or null)",
+          "totalAmount": "The total monetary amount, if applicable, as a string with currency (e.g., '$1,234.50' or null)",
+          "keywords": "A list of 5 key terms or concepts from the document (or [])"
+        }
+      }
+      If a field is not applicable or not found, set its value to null. The summary is mandatory.
+      Respond ONLY with the JSON object. Do not include introductory or concluding text.`;
+  }
+
+  /**
+   * Analyzes a document's text using OpenRouter LLM
+   */
+  async analyzeDocument(extractedText: string): Promise<ILLMAnalysisResult> {
+    const userPrompt = `Analyze the following document text and provide the output in the requested JSON format:\n\n---\n\n${extractedText}`;
+
+    const payload = {
+      model: this.model,
+      messages: [
+        { role: 'system', content: this.systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
+      response_format: { type: 'json_object' },
+    };
+
+    try {
+      const response = await this.axiosInstance.post(
+        '/chat/completions',
+        payload,
+      );
+
+      const content = response.data.choices[0]?.message?.content;
+      if (!content) {
+        throw new InternalServerErrorException(sysMsg.LLM_RESPONSE_INVALID);
+      }
+
+      const parsedContent = JSON.parse(content);
+
+      // Validate required fields
+      if (
+        !parsedContent.summary ||
+        !parsedContent.documentType ||
+        !parsedContent.extractedMetadata
+      ) {
+        this.logger.error('LLM response missing required fields', parsedContent);
+        throw new InternalServerErrorException(sysMsg.LLM_RESPONSE_INVALID);
+      }
+
+      this.logger.log(sysMsg.LLM_ANALYSIS_SUCCESS);
+      return parsedContent as ILLMAnalysisResult;
+    } catch (error) {
+      this.logger.error(
+        `${sysMsg.LLM_ANALYSIS_FAILED}: ${error.response?.data || error.message}`,
+      );
+      throw new InternalServerErrorException(sysMsg.LLM_ANALYSIS_FAILED);
+    }
+  }
+}
