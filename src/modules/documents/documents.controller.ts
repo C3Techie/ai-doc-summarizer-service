@@ -14,33 +14,28 @@ import {
   HttpStatus,
   HttpCode,
   UseGuards,
-} from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { DocumentsService } from './documents.service';
-import {
-  DocumentResponseDto,
-  PaginatedDocumentsResponseDto,
-  AnalyzeDocumentDto,
-  ListDocumentsQueryDto,
-} from './dtos';
+} from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { ApiTags, ApiBearerAuth } from "@nestjs/swagger";
+import { DocumentsService } from "./documents.service";
+import { AnalyzeDocumentDto, ListDocumentsQueryDto } from "./dtos";
 import {
   DocsUploadDocument,
   DocsListDocuments,
   DocsAnalyzeDocument,
   DocsGetDocumentById,
   DocsDeleteDocument,
-} from './docs';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+} from "./docs";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 
 /**
  * Controller for document operations
  * Handles upload, analysis, retrieval, and listing of documents
  */
-@ApiTags('Documents')
-@ApiBearerAuth('JWT')
+@ApiTags("Documents")
+@ApiBearerAuth("JWT")
 @UseGuards(JwtAuthGuard)
-@Controller('documents')
+@Controller("documents")
 export class DocumentsController {
   constructor(private readonly documentsService: DocumentsService) {}
 
@@ -48,9 +43,9 @@ export class DocumentsController {
    * POST /documents/upload
    * Uploads a document file, extracts text, and stores it
    */
-  @Post('upload')
+  @Post("upload")
   @HttpCode(HttpStatus.CREATED)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor("file"))
   @DocsUploadDocument()
   async uploadDocument(
     @UploadedFile(
@@ -59,7 +54,7 @@ export class DocumentsController {
           new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }), // 5MB
           new FileTypeValidator({
             fileType:
-              'application/(pdf|vnd\\.openxmlformats-officedocument\\.wordprocessingml\\.document)',
+              "application/(pdf|vnd\\.openxmlformats-officedocument\\.wordprocessingml\\.document)",
           }),
         ],
         errorHttpStatusCode: HttpStatus.UNSUPPORTED_MEDIA_TYPE,
@@ -77,9 +72,7 @@ export class DocumentsController {
   @Get()
   @HttpCode(HttpStatus.OK)
   @DocsListDocuments()
-  async listDocuments(
-    @Query() query: ListDocumentsQueryDto,
-  ) {
+  async listDocuments(@Query() query: ListDocumentsQueryDto) {
     return this.documentsService.listDocuments(query);
   }
 
@@ -87,11 +80,11 @@ export class DocumentsController {
    * POST /documents/:id/analyze
    * Analyzes a document using AI/LLM
    */
-  @Post(':id/analyze')
+  @Post(":id/analyze")
   @HttpCode(HttpStatus.CREATED)
   @DocsAnalyzeDocument()
   async analyzeDocument(
-    @Param('id') id: string,
+    @Param("id") id: string,
     @Body() analyzeDto?: AnalyzeDocumentDto,
   ) {
     return this.documentsService.analyzeDocument(
@@ -104,10 +97,10 @@ export class DocumentsController {
    * GET /documents/:id
    * Retrieves a single document by ID
    */
-  @Get(':id')
+  @Get(":id")
   @HttpCode(HttpStatus.OK)
   @DocsGetDocumentById()
-  async getDocument(@Param('id') id: string) {
+  async getDocument(@Param("id") id: string) {
     return this.documentsService.getDocument(id);
   }
 
@@ -115,10 +108,10 @@ export class DocumentsController {
    * DELETE /documents/:id
    * Soft deletes a document
    */
-  @Delete(':id')
+  @Delete(":id")
   @HttpCode(HttpStatus.OK)
   @DocsDeleteDocument()
-  async deleteDocument(@Param('id') id: string) {
+  async deleteDocument(@Param("id") id: string) {
     return this.documentsService.deleteDocument(id);
   }
 }

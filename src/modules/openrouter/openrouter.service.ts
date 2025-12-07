@@ -2,12 +2,12 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import axios, { AxiosInstance } from 'axios';
-import * as sysMsg from '../../constants/system.messages';
-import { DocumentType } from '../documents/document.schema';
-import { ExtractedMetadata } from '../../common/types';
+} from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import axios, { AxiosInstance } from "axios";
+import * as sysMsg from "../../constants/system.messages";
+import { DocumentType } from "../documents/document.schema";
+import { ExtractedMetadata } from "../../common/types";
 
 /**
  * Interface for LLM analysis result
@@ -30,21 +30,19 @@ export class OpenrouterService {
   private systemPrompt: string;
 
   constructor(private configService: ConfigService) {
-    const apiKey = this.configService.get<string>('OPENROUTER_API_KEY');
+    const apiKey = this.configService.get<string>("OPENROUTER_API_KEY");
     if (!apiKey) {
       this.logger.error(sysMsg.OPENROUTER_API_KEY_MISSING);
-      throw new InternalServerErrorException(
-        sysMsg.OPENROUTER_API_KEY_MISSING,
-      );
+      throw new InternalServerErrorException(sysMsg.OPENROUTER_API_KEY_MISSING);
     }
 
     this.axiosInstance = axios.create({
-      baseURL: 'https://openrouter.ai/api/v1',
+      baseURL: "https://openrouter.ai/api/v1",
       headers: {
         Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://github.com/yourusername/ai-doc-summarizer',
-        'X-Title': 'AI Document Summarizer',
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://github.com/yourusername/ai-doc-summarizer",
+        "X-Title": "AI Document Summarizer",
       },
       timeout: 60000, // 60 second timeout
       maxContentLength: Infinity,
@@ -52,7 +50,7 @@ export class OpenrouterService {
     });
 
     // Use a free/low-cost model
-    this.model = 'openai/gpt-4o-mini';
+    this.model = "openai/gpt-4o-mini";
 
     // System prompt for structured JSON output
     this.systemPrompt = `You are an expert AI document analysis and summarization service. Your task is to process the provided document text and extract specific information.
@@ -80,26 +78,48 @@ export class OpenrouterService {
     const payload = {
       model: this.model,
       messages: [
-        { role: 'system', content: this.systemPrompt },
-        { role: 'user', content: userPrompt },
+        { role: "system", content: this.systemPrompt },
+        { role: "user", content: userPrompt },
       ],
-      response_format: { type: 'json_object' },
+      response_format: { type: "json_object" },
     };
 
     try {
       const response = await this.axiosInstance.post(
-        '/chat/completions',
+        "/chat/completions",
         payload,
         {
           validateStatus: (status) => status < 500, // Don't throw on 4xx errors
         },
       );
 
-      // Check for API errors
-      if (response.status >= 400) {
-        this.logger.error(`OpenRouter API error: ${response.status}`, response.data);
+      // Check for API errors with specific handling
+      if (response.status === 401 || response.status === 403) {
+        this.logger.error(
+          `OpenRouter authentication failed: ${response.status}`,
+        );
+        throw new InternalServerErrorException(sysMsg.OPENROUTER_UNAUTHORIZED);
+      }
+
+      if (response.status === 429) {
+        this.logger.error("OpenRouter rate limit exceeded");
+        throw new InternalServerErrorException(sysMsg.OPENROUTER_RATE_LIMIT);
+      }
+
+      if (response.status === 402) {
+        this.logger.error("OpenRouter insufficient credits");
         throw new InternalServerErrorException(
-          `OpenRouter API error: ${response.data?.error?.message || 'Unknown error'}`,
+          sysMsg.OPENROUTER_INSUFFICIENT_CREDITS,
+        );
+      }
+
+      if (response.status >= 400) {
+        this.logger.error(
+          `OpenRouter API error: ${response.status}`,
+          response.data,
+        );
+        throw new InternalServerErrorException(
+          `OpenRouter API error: ${response.data?.error?.message || "Unknown error"}`,
         );
       }
 
@@ -116,17 +136,21 @@ export class OpenrouterService {
         !parsedContent.documentType ||
         !parsedContent.extractedMetadata
       ) {
-        this.logger.error('LLM response missing required fields', parsedContent);
+        this.logger.error(
+          "LLM response missing required fields",
+          parsedContent,
+        );
         throw new InternalServerErrorException(sysMsg.LLM_RESPONSE_INVALID);
       }
 
       this.logger.log(sysMsg.LLM_ANALYSIS_SUCCESS);
       return parsedContent as ILLMAnalysisResult;
     } catch (error) {
-      const errorMsg = error.code === 'ECONNRESET' 
-        ? 'Connection to OpenRouter was reset. The document might be too large or the network is unstable.'
-        : error.response?.data?.error?.message || error.message;
-      
+      const errorMsg =
+        error.code === "ECONNRESET"
+          ? "Connection to OpenRouter was reset. The document might be too large or the network is unstable."
+          : error.response?.data?.error?.message || error.message;
+
       this.logger.error(`${sysMsg.LLM_ANALYSIS_FAILED}: ${errorMsg}`);
       throw new InternalServerErrorException(sysMsg.LLM_ANALYSIS_FAILED);
     }

@@ -1,1 +1,1 @@
-export * from './skip-wrap.decorator';
+export * from "./skip-wrap.decorator";

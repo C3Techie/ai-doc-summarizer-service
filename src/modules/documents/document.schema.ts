@@ -1,6 +1,6 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document as MongooseDocument } from 'mongoose';
-import { ExtractedMetadata } from '../../common/types';
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Document as MongooseDocument } from "mongoose";
+import { ExtractedMetadata } from "../../common/types";
 
 export type DocumentDocument = Document & MongooseDocument;
 
@@ -8,23 +8,23 @@ export type DocumentDocument = Document & MongooseDocument;
  * Analysis status enum for document processing
  */
 export enum AnalysisStatus {
-  PENDING = 'PENDING',
-  ANALYZING = 'ANALYZING',
-  COMPLETED = 'COMPLETED',
-  FAILED = 'FAILED',
+  PENDING = "PENDING",
+  ANALYZING = "ANALYZING",
+  COMPLETED = "COMPLETED",
+  FAILED = "FAILED",
 }
 
 /**
  * Document types that can be detected
  */
 export enum DocumentType {
-  INVOICE = 'invoice',
-  CV = 'CV',
-  REPORT = 'report',
-  LETTER = 'letter',
-  CONTRACT = 'contract',
-  ARTICLE = 'article',
-  OTHER = 'other',
+  INVOICE = "invoice",
+  CV = "CV",
+  REPORT = "report",
+  LETTER = "letter",
+  CONTRACT = "contract",
+  ARTICLE = "article",
+  OTHER = "other",
 }
 
 /**

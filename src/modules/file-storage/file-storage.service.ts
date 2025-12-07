@@ -1,9 +1,13 @@
-import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import * as Client from 'minio';
-import * as crypto from 'crypto';
-import * as path from 'path';
-import * as sysMsg from '../../constants/system.messages';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import * as Client from "minio";
+import * as crypto from "crypto";
+import * as path from "path";
+import * as sysMsg from "../../constants/system.messages";
 
 /**
  * Service for handling file storage operations using MinIO
@@ -17,10 +21,10 @@ export class FileStorageService {
   private readonly logger = new Logger(FileStorageService.name);
 
   constructor(private configService: ConfigService) {
-    const minioEndpoint = this.configService.get<string>('MINIO_ENDPOINT');
-    const minioAccessKey = this.configService.get<string>('MINIO_ACCESS_KEY');
-    const minioSecretKey = this.configService.get<string>('MINIO_SECRET_KEY');
-    this.bucket = this.configService.get<string>('MINIO_BUCKET') || 'aidocs';
+    const minioEndpoint = this.configService.get<string>("MINIO_ENDPOINT");
+    const minioAccessKey = this.configService.get<string>("MINIO_ACCESS_KEY");
+    const minioSecretKey = this.configService.get<string>("MINIO_SECRET_KEY");
+    this.bucket = this.configService.get<string>("MINIO_BUCKET") || "aidocs";
 
     // Check if MinIO is configured
     this.useMinIO = !!(minioEndpoint && minioAccessKey && minioSecretKey);
@@ -29,8 +33,8 @@ export class FileStorageService {
       try {
         // Parse endpoint to get host and port
         const url = new URL(minioEndpoint);
-        const useSSL = url.protocol === 'https:';
-        const port = url.port ? parseInt(url.port) : (useSSL ? 443 : 9000);
+        const useSSL = url.protocol === "https:";
+        const port = url.port ? parseInt(url.port) : useSSL ? 443 : 9000;
 
         this.minioClient = new Client.Client({
           endPoint: url.hostname,
@@ -42,11 +46,13 @@ export class FileStorageService {
 
         this.initializeMinIO();
       } catch (error) {
-        this.logger.error(`${sysMsg.MINIO_CONNECTION_FAILED}: ${error.message}`);
+        this.logger.error(
+          `${sysMsg.MINIO_CONNECTION_FAILED}: ${error.message}`,
+        );
         throw new InternalServerErrorException(sysMsg.STORAGE_SETUP_FAILED);
       }
     } else {
-      this.logger.warn('MinIO not configured. Using local storage fallback.');
+      this.logger.warn("MinIO not configured. Using local storage fallback.");
     }
   }
 
@@ -56,14 +62,14 @@ export class FileStorageService {
   private async initializeMinIO(): Promise<void> {
     try {
       const bucketExists = await this.minioClient.bucketExists(this.bucket);
-      
+
       if (!bucketExists) {
-        await this.minioClient.makeBucket(this.bucket, 'us-east-1');
+        await this.minioClient.makeBucket(this.bucket, "us-east-1");
         this.logger.log(`${sysMsg.MINIO_BUCKET_CREATED}: ${this.bucket}`);
       } else {
         this.logger.log(`${sysMsg.MINIO_BUCKET_EXISTS}: ${this.bucket}`);
       }
-      
+
       this.logger.log(sysMsg.MINIO_INITIALIZED);
     } catch (error) {
       this.logger.error(`${sysMsg.STORAGE_SETUP_FAILED}: ${error.message}`);
@@ -76,12 +82,12 @@ export class FileStorageService {
    */
   async saveFile(file: Express.Multer.File): Promise<string> {
     const fileExtension = path.extname(file.originalname);
-    const uniqueFilename = `${crypto.randomBytes(16).toString('hex')}-${Date.now()}${fileExtension}`;
+    const uniqueFilename = `${crypto.randomBytes(16).toString("hex")}-${Date.now()}${fileExtension}`;
 
     try {
       const metadata = {
-        'Content-Type': file.mimetype,
-        'X-Original-Name': file.originalname,
+        "Content-Type": file.mimetype,
+        "X-Original-Name": file.originalname,
       };
 
       await this.minioClient.putObject(
@@ -121,7 +127,7 @@ export class FileStorageService {
       await this.minioClient.statObject(this.bucket, objectKey);
       return true;
     } catch (error) {
-      if (error.code === 'NotFound') {
+      if (error.code === "NotFound") {
         return false;
       }
       throw error;
@@ -133,13 +139,16 @@ export class FileStorageService {
    */
   async getFile(objectKey: string): Promise<Buffer> {
     try {
-      const dataStream = await this.minioClient.getObject(this.bucket, objectKey);
+      const dataStream = await this.minioClient.getObject(
+        this.bucket,
+        objectKey,
+      );
       const chunks: Buffer[] = [];
 
       return new Promise((resolve, reject) => {
-        dataStream.on('data', (chunk) => chunks.push(chunk));
-        dataStream.on('end', () => resolve(Buffer.concat(chunks)));
-        dataStream.on('error', reject);
+        dataStream.on("data", (chunk) => chunks.push(chunk));
+        dataStream.on("end", () => resolve(Buffer.concat(chunks)));
+        dataStream.on("error", reject);
       });
     } catch (error) {
       this.logger.error(`${sysMsg.FILE_SAVE_FAILED}: ${error.message}`);

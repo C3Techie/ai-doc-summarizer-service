@@ -4,17 +4,17 @@ import {
   InternalServerErrorException,
   Logger,
   BadRequestException,
-} from '@nestjs/common';
-import { isValidObjectId } from 'mongoose';
-import * as sysMsg from '../../constants/system.messages';
-import type { DocumentFilterOptions } from '../../common/types';
-import { ApiResponse, PaginatedResponse } from '../../common/interfaces';
-import { DocumentModelAction } from './model-actions';
-import { DocumentResponseDto, PaginatedDocumentsResponseDto, ListDocumentsQueryDto } from './dtos';
-import { AnalysisStatus, DocumentType, DocumentDocument } from './document.schema';
-import { OpenrouterService } from '../openrouter/openrouter.service';
-import { TextExtractionService } from '../text-extraction/text-extraction.service';
-import { FileStorageService } from '../file-storage/file-storage.service';
+} from "@nestjs/common";
+import { isValidObjectId } from "mongoose";
+import * as sysMsg from "../../constants/system.messages";
+import type { DocumentFilterOptions } from "../../common/types";
+import { ApiResponse, PaginatedResponse } from "../../common/interfaces";
+import { DocumentModelAction } from "./model-actions";
+import { DocumentResponseDto, ListDocumentsQueryDto } from "./dtos";
+import { AnalysisStatus, DocumentDocument } from "./document.schema";
+import { OpenrouterService } from "../openrouter/openrouter.service";
+import { TextExtractionService } from "../text-extraction/text-extraction.service";
+import { FileStorageService } from "../file-storage/file-storage.service";
 
 /**
  * Main service for document operations
@@ -89,7 +89,9 @@ export class DocumentsService {
       this.logger.log(`${sysMsg.DOCUMENT_UPLOADED}: ${file.originalname}`);
       return {
         message: sysMsg.DOCUMENT_UPLOADED,
-        data: new DocumentResponseDto((createdDocument as DocumentDocument).toObject()),
+        data: new DocumentResponseDto(
+          (createdDocument as DocumentDocument).toObject(),
+        ),
       };
     } catch (dbError) {
       await this.fileStorageService.deleteFile(objectKey);
@@ -202,7 +204,9 @@ export class DocumentsService {
         identifierOptions: { _id: id },
         updatePayload: { analysisStatus: AnalysisStatus.FAILED },
       });
-      this.logger.error(`${sysMsg.ANALYSIS_FAILED} for ${id}: ${llmError.message}`);
+      this.logger.error(
+        `${sysMsg.ANALYSIS_FAILED} for ${id}: ${llmError.message}`,
+      );
       throw llmError;
     }
 

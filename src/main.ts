@@ -1,27 +1,27 @@
-import { ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { NestFactory, Reflector } from '@nestjs/core';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ValidationPipe } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { NestFactory, Reflector } from "@nestjs/core";
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 
-import { AppModule } from './app.module';
-import { ResponseTransformInterceptor } from './common/interceptors/response-transform.interceptor';
-import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { AppModule } from "./app.module";
+import { ResponseTransformInterceptor } from "./common/interceptors/response-transform.interceptor";
+import { LoggingInterceptor } from "./common/interceptors/logging.interceptor";
 
 async function bootstrap() {
-  console.log('🚀 Bootstrap starting...');
+  console.log("🚀 Bootstrap starting...");
   const app = await NestFactory.create(AppModule);
-  console.log('✅ NestFactory created');
+  console.log("✅ NestFactory created");
   const configService = app.get(ConfigService);
-  console.log('✅ ConfigService retrieved');
+  console.log("✅ ConfigService retrieved");
 
   app.enableCors();
 
-  const apiPrefix = configService.get<string>('API_PREFIX', 'api');
-  const apiVersion = configService.get<string>('API_VERSION', 'v1');
+  const apiPrefix = configService.get<string>("API_PREFIX", "api");
+  const apiVersion = configService.get<string>("API_VERSION", "v1");
   const globalPrefix = `${apiPrefix}/${apiVersion}`;
 
   app.setGlobalPrefix(globalPrefix, {
-    exclude: ['docs'],
+    exclude: ["docs"],
   });
 
   // Global interceptors
@@ -42,34 +42,34 @@ async function bootstrap() {
 
   // Swagger setup
   const config = new DocumentBuilder()
-    .setTitle('AI Document Summarizer Service')
+    .setTitle("AI Document Summarizer Service")
     .setDescription(
-      'Service to upload, extract, and analyze documents using OpenRouter LLM.',
+      "Service to upload, extract, and analyze documents using OpenRouter LLM.",
     )
-    .setVersion('1.0')
+    .setVersion("1.0")
     .addBearerAuth(
       {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT',
+        type: "http",
+        scheme: "bearer",
+        bearerFormat: "JWT",
       },
-      'JWT',
+      "JWT",
     )
-    .addTag('Authentication')
-    .addTag('Documents')
+    .addTag("Authentication")
+    .addTag("Documents")
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document, {
+  SwaggerModule.setup("docs", app, document, {
     swaggerOptions: {
       persistAuthorization: true,
-      tagsSorter: 'alpha',
-      operationsSorter: 'alpha',
+      tagsSorter: "alpha",
+      operationsSorter: "alpha",
     },
   });
 
-  const port = configService.get<string>('PORT', '3000');
-  const env = configService.get<string>('NODE_ENV', 'development');
+  const port = configService.get<string>("PORT", "3000");
+  const env = configService.get<string>("NODE_ENV", "development");
 
   await app.listen(port);
 
@@ -84,6 +84,6 @@ async function bootstrap() {
 }
 
 bootstrap().catch((error) => {
-  console.error('❌ Failed to start application:', error);
+  console.error("❌ Failed to start application:", error);
   process.exit(1);
 });
