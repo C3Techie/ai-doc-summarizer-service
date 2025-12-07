@@ -38,10 +38,10 @@ export class DocumentsService {
   async uploadDocument(
     file: Express.Multer.File,
   ): Promise<ApiResponse<DocumentResponseDto>> {
-    // Save file to storage
-    let filePath: string;
+    // Save file to MinIO storage
+    let objectKey: string;
     try {
-      filePath = await this.fileStorageService.saveFile(file);
+      objectKey = await this.fileStorageService.saveFile(file);
     } catch (error) {
       this.logger.error(
         `${sysMsg.FILE_SAVE_FAILED} for ${file.originalname}: ${error.message}`,
@@ -49,15 +49,16 @@ export class DocumentsService {
       throw new InternalServerErrorException(sysMsg.DOCUMENT_UPLOAD_FAILED);
     }
 
-    // Extract text from file
+    // Extract text from file buffer
     let extractedText: string;
     try {
-      extractedText = await this.textExtractionService.extractTextFromFile(
-        filePath,
+      extractedText = await this.textExtractionService.extractTextFromBuffer(
+        file.buffer,
         file.mimetype,
+        file.originalname,
       );
     } catch (textExtractionError) {
-      await this.fileStorageService.deleteFile(filePath);
+      await this.fileStorageService.deleteFile(objectKey);
       this.logger.error(
         `${sysMsg.TEXT_EXTRACTION_FAILED} for ${file.originalname}: ${textExtractionError.message}`,
       );
@@ -79,7 +80,7 @@ export class DocumentsService {
           originalName: file.originalname,
           mimetype: file.mimetype,
           size: file.size,
-          storagePath: filePath,
+          storagePath: objectKey,
           extractedText: extractedText,
           analysisStatus: AnalysisStatus.PENDING,
         },
@@ -91,7 +92,7 @@ export class DocumentsService {
         data: new DocumentResponseDto((createdDocument as DocumentDocument).toObject()),
       };
     } catch (dbError) {
-      await this.fileStorageService.deleteFile(filePath);
+      await this.fileStorageService.deleteFile(objectKey);
       this.logger.error(
         `${sysMsg.DOCUMENT_UPLOAD_FAILED_DATABASE_SAVE} for ${file.originalname}: ${dbError.message}`,
       );

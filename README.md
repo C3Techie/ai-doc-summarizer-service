@@ -5,6 +5,7 @@ A NestJS-based microservice for document upload, text extraction, and AI-powered
 ## Features
 
 - **Document Upload**: Accept PDF and DOCX files (max 5MB)
+- **MinIO Object Storage**: Secure file storage using MinIO for scalability and S3 compatibility
 - **Text Extraction**: Automatically extract text from uploaded documents using pdf-parse and mammoth
 - **AI Analysis**: Use OpenRouter LLM to generate summaries and extract metadata
 - **JWT Authentication**: Secure signup/login with Bearer token authentication
@@ -55,10 +56,10 @@ src/
 │   │   ├── documents.controller.ts      # API endpoints (JWT protected)
 │   │   └── documents.module.ts          # Module configuration
 │   ├── file-storage/
-│   │   ├── file-storage.service.ts      # Local file storage (S3-ready)
+│   │   ├── file-storage.service.ts      # MinIO object storage integration
 │   │   └── file-storage.module.ts
 │   ├── text-extraction/
-│   │   ├── text-extraction.service.ts   # PDF/DOCX text extraction
+│   │   ├── text-extraction.service.ts   # PDF/DOCX text extraction from buffers
 │   │   └── text-extraction.module.ts
 │   └── openrouter/
 │       ├── openrouter.service.ts        # LLM API integration
@@ -209,7 +210,7 @@ Authorization: Bearer {token}
     "originalName": "invoice.pdf",
     "mimetype": "application/pdf",
     "size": 1024000,
-    "storagePath": "/uploads/abc123.pdf",
+    "storagePath": "a1b2c3d4e5f6-1234567890.pdf",
     "extractedText": "Full extracted text...",
     "summary": "Document summary...",
     "documentType": "invoice",
@@ -270,6 +271,7 @@ Authorization: Bearer {token}
 ### Prerequisites
 - Node.js (v18+)
 - MongoDB (local or Atlas)
+- MinIO (local or cloud)
 - OpenRouter API key
 
 ### Installation
@@ -297,13 +299,19 @@ API_VERSION=v1
 # MongoDB Configuration
 MONGODB_URI=mongodb://localhost:27017/aidocsummarizer
 
+# MinIO Configuration
+MINIO_ENDPOINT=http://127.0.0.1:9000
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=minioadmin
+MINIO_BUCKET=aidocs
+
 # OpenRouter Configuration
 OPENROUTER_API_KEY=sk-or-v1-your-api-key-here
 
 # JWT Configuration
 JWT_SECRET=your-super-secret-jwt-key-change-in-production
 
-# File Storage
+# File Storage (Fallback)
 STORAGE_PATH=./uploads
 ```
 
@@ -315,7 +323,20 @@ mongod --dbpath ~/data/db
 # Or use MongoDB Atlas connection string in .env
 ```
 
-5. **Run the application:**
+5. **Start MinIO:**
+```bash
+# Windows
+C:/minio/minio.exe server C:/minio/data --console-address ":9001"
+
+# Linux/macOS
+minio server ~/minio/data --console-address ":9001"
+
+# MinIO Console: http://localhost:9001
+# MinIO API: http://localhost:9000
+# Default credentials: minioadmin / minioadmin
+```
+
+6. **Run the application:**
 ```bash
 # Development mode
 npm run start:dev
@@ -325,7 +346,7 @@ npm run build
 npm run start:prod
 ```
 
-6. **Access Swagger Documentation:**
+7. **Access Swagger Documentation:**
 Open browser to `http://localhost:3000/docs`
 
 ## Usage Flow
@@ -342,8 +363,11 @@ Open browser to `http://localhost:3000/docs`
 ### Core Framework
 - **NestJS**: TypeScript framework for scalable server-side applications
 - **MongoDB + Mongoose**: NoSQL database with ODM for flexible document storage
+- **MinIO**: S3-compatible object storage for scalable file management
 
 ### Key Libraries
+
+**MinIO Client** - High-performance object storage SDK for Node.js with S3-compatible API. Provides secure, scalable file storage with built-in bucket management, metadata support, and seamless cloud migration path. Enables local development with production-ready infrastructure.
 
 **OpenRouter** - Integrates multiple LLM providers (GPT-4, Claude, etc.) through a single API, enabling flexible AI-powered document analysis without vendor lock-in. Provides cost-effective access to various models for text summarization and metadata extraction.
 
@@ -400,9 +424,13 @@ npm run build
 | `API_PREFIX` | API route prefix | `api` | No |
 | `API_VERSION` | API version | `v1` | No |
 | `MONGODB_URI` | MongoDB connection string | `mongodb://localhost:27017/aidocsummarizer` | Yes |
+| `MINIO_ENDPOINT` | MinIO server endpoint | `http://127.0.0.1:9000` | Yes |
+| `MINIO_ACCESS_KEY` | MinIO access key | `minioadmin` | Yes |
+| `MINIO_SECRET_KEY` | MinIO secret key | `minioadmin` | Yes |
+| `MINIO_BUCKET` | MinIO bucket name | `aidocs` | Yes |
 | `OPENROUTER_API_KEY` | OpenRouter API key | - | Yes |
 | `JWT_SECRET` | JWT signing secret | - | Yes |
-| `STORAGE_PATH` | Local file storage path | `./uploads` | No |
+| `STORAGE_PATH` | Fallback storage path | `./uploads` | No |
 
 ### File Limits
 
@@ -458,7 +486,8 @@ All user-facing messages are centralized in `src/constants/system.messages.ts` f
 
 ## Future Enhancements
 
-- [ ] S3/MinIO integration for cloud storage
+- [x] MinIO object storage integration
+- [ ] S3 cloud storage support
 - [ ] Batch document processing
 - [ ] Webhook notifications on analysis completion
 - [ ] Document versioning

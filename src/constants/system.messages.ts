@@ -36,6 +36,12 @@ export const FILE_DELETED = 'File deleted successfully.';
 export const FILE_DELETE_FAILED = 'Failed to delete file.';
 export const STORAGE_SETUP_FAILED = 'File storage setup failed.';
 export const STORAGE_DIRECTORY_ENSURED = 'Storage directory ensured successfully.';
+export const MINIO_BUCKET_CREATED = 'MinIO bucket created successfully.';
+export const MINIO_BUCKET_EXISTS = 'MinIO bucket already exists.';
+export const MINIO_CONNECTION_FAILED = 'Failed to connect to MinIO server.';
+export const MINIO_UPLOAD_FAILED = 'Failed to upload file to MinIO.';
+export const MINIO_DELETE_FAILED = 'Failed to delete file from MinIO.';
+export const MINIO_INITIALIZED = 'MinIO storage initialized successfully.';
 
 // ==================== TEXT EXTRACTION MESSAGES ====================
 export const TEXT_EXTRACTION_SUCCESS = 'Text extracted successfully from document.';

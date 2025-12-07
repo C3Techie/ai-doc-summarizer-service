@@ -88,7 +88,7 @@ export class DocumentsController {
    * Analyzes a document using AI/LLM
    */
   @Post(':id/analyze')
-  @HttpCode(HttpStatus.OK)
+  @HttpCode(HttpStatus.CREATED)
   @DocsAnalyzeDocument()
   async analyzeDocument(
     @Param('id') id: string,

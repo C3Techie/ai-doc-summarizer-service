@@ -64,7 +64,7 @@ export class Document {
   size: number; // in bytes
 
   @Prop({ required: true, unique: true })
-  storagePath: string; // The path where the raw file is stored (local/S3/Minio)
+  storagePath: string; // The MinIO object key where the file is stored
 
   @Prop({ required: true, maxlength: 200000 }) // Max character limit for text extraction
   extractedText: string;
