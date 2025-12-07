@@ -1,2 +1,2 @@
-export * from './document.swagger';
-export * from './document.decorator';
+export * from "./document.swagger";
+export * from "./document.decorator";

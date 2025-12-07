@@ -1,6 +1,9 @@
-import { Model, FilterQuery, UpdateQuery, ClientSession } from 'mongoose';
-import { NotFoundException, InternalServerErrorException } from '@nestjs/common';
-import * as sysMsg from '../../constants/system.messages';
+import { Model, FilterQuery, UpdateQuery, ClientSession } from "mongoose";
+import {
+  NotFoundException,
+  InternalServerErrorException,
+} from "@nestjs/common";
+import * as sysMsg from "../../constants/system.messages";
 
 /**
  * Pagination options for list operations
@@ -71,7 +74,7 @@ export interface IListOptions<T> {
   filterRecordOptions?: FilterQuery<T>;
   select?: string | string[];
   populate?: string | string[];
-  sort?: Record<string, 1 | -1 | 'asc' | 'desc'>;
+  sort?: Record<string, 1 | -1 | "asc" | "desc">;
   paginationPayload?: IPaginationPayload;
 }
 
@@ -82,7 +85,7 @@ export interface IFindOptions<T> {
   findOptions: FilterQuery<T>;
   select?: string | string[];
   populate?: string | string[];
-  sort?: Record<string, 1 | -1 | 'asc' | 'desc'>;
+  sort?: Record<string, 1 | -1 | "asc" | "desc">;
   transactionOptions?: ITransactionOptions;
 }
 
@@ -114,7 +117,8 @@ export abstract class AbstractModelAction<T> {
       );
       return created[0] as T;
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
       throw new InternalServerErrorException(
         `${sysMsg.DB_CREATE_FAILED}: ${errorMessage}`,
       );
@@ -145,7 +149,8 @@ export abstract class AbstractModelAction<T> {
       return updated as T;
     } catch (error: unknown) {
       if (error instanceof NotFoundException) throw error;
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
       throw new InternalServerErrorException(
         `${sysMsg.DB_UPDATE_FAILED}: ${errorMessage}`,
       );
@@ -175,7 +180,8 @@ export abstract class AbstractModelAction<T> {
 
       return await query.exec();
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
       throw new InternalServerErrorException(
         `${sysMsg.DB_GET_FAILED}: ${errorMessage}`,
       );
@@ -237,7 +243,8 @@ export abstract class AbstractModelAction<T> {
         },
       };
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
       throw new InternalServerErrorException(
         `${sysMsg.DB_LIST_FAILED}: ${errorMessage}`,
       );
@@ -280,7 +287,8 @@ export abstract class AbstractModelAction<T> {
         payload: payload as T[],
       };
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
       throw new InternalServerErrorException(
         `${sysMsg.DB_FIND_FAILED}: ${errorMessage}`,
       );
@@ -297,7 +305,8 @@ export abstract class AbstractModelAction<T> {
       const result = await this.model.deleteOne(identifierOptions);
       return result.deletedCount > 0;
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
       throw new InternalServerErrorException(
         `${sysMsg.DB_DELETE_FAILED}: ${errorMessage}`,
       );
@@ -311,7 +320,8 @@ export abstract class AbstractModelAction<T> {
     try {
       return await this.model.countDocuments(filterOptions);
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
       throw new InternalServerErrorException(
         `${sysMsg.DB_COUNT_FAILED}: ${errorMessage}`,
       );

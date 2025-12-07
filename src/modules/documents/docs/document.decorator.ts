@@ -1,4 +1,4 @@
-import { applyDecorators } from '@nestjs/common';
+import { applyDecorators } from "@nestjs/common";
 import {
   ApiOperation,
   ApiResponse,
@@ -6,14 +6,14 @@ import {
   ApiQuery,
   ApiConsumes,
   ApiBody,
-} from '@nestjs/swagger';
-import { DocumentSwagger } from './document.swagger';
+} from "@nestjs/swagger";
+import { DocumentSwagger } from "./document.swagger";
 import {
   DocumentResponseDto,
   PaginatedDocumentsResponseDto,
   UploadDocumentDto,
   AnalyzeDocumentDto,
-} from '../dtos';
+} from "../dtos";
 
 /**
  * Decorator for Upload Document endpoint
@@ -23,9 +23,9 @@ export const DocsUploadDocument = () => {
 
   return applyDecorators(
     ApiOperation(operation),
-    ApiConsumes('multipart/form-data'),
+    ApiConsumes("multipart/form-data"),
     ApiBody({
-      description: 'Document file to upload',
+      description: "Document file to upload",
       type: UploadDocumentDto,
     }),
     ApiResponse({
@@ -61,13 +61,14 @@ export const DocsListDocuments = () => {
  * Decorator for Analyze Document endpoint
  */
 export const DocsAnalyzeDocument = () => {
-  const { operation, parameters, responses } = DocumentSwagger.endpoints.analyze;
+  const { operation, parameters, responses } =
+    DocumentSwagger.endpoints.analyze;
 
   return applyDecorators(
     ApiOperation(operation),
     ApiParam(parameters.id),
     ApiBody({
-      description: 'Analysis options',
+      description: "Analysis options",
       type: AnalyzeDocumentDto,
       required: false,
     }),
@@ -85,7 +86,8 @@ export const DocsAnalyzeDocument = () => {
  * Decorator for Get Document by ID endpoint
  */
 export const DocsGetDocumentById = () => {
-  const { operation, parameters, responses } = DocumentSwagger.endpoints.getById;
+  const { operation, parameters, responses } =
+    DocumentSwagger.endpoints.getById;
 
   return applyDecorators(
     ApiOperation(operation),

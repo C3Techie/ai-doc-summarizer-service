@@ -1,5 +1,5 @@
-import { SetMetadata } from '@nestjs/common';
-import { SKIP_WRAP_KEY } from '../interceptors/response-transform.interceptor';
+import { SetMetadata } from "@nestjs/common";
+import { SKIP_WRAP_KEY } from "../interceptors/response-transform.interceptor";
 
 /**
  * Decorator to skip response wrapping for specific endpoints

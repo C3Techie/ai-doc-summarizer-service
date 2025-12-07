@@ -1,4 +1,4 @@
-import { applyDecorators } from '@nestjs/common';
+import { applyDecorators } from "@nestjs/common";
 import {
   ApiOperation,
   ApiResponse,
@@ -6,7 +6,7 @@ import {
   ApiBadRequestResponse,
   ApiConflictResponse,
   ApiUnauthorizedResponse,
-} from '@nestjs/swagger';
+} from "@nestjs/swagger";
 
 /**
  * Swagger decorator for signup endpoint
@@ -14,77 +14,83 @@ import {
 export function DocsSignup() {
   return applyDecorators(
     ApiOperation({
-      summary: 'Register a new user',
-      description: 'Create a new user account with email and password',
+      summary: "Register a new user",
+      description: "Create a new user account with email and password",
     }),
     ApiBody({
       schema: {
-        type: 'object',
-        required: ['email', 'password', 'firstName', 'lastName'],
+        type: "object",
+        required: ["email", "password", "firstName", "lastName"],
         properties: {
           email: {
-            type: 'string',
-            format: 'email',
-            example: 'user@example.com',
+            type: "string",
+            format: "email",
+            example: "user@example.com",
           },
           password: {
-            type: 'string',
+            type: "string",
             minLength: 6,
-            example: 'SecurePass123!',
+            example: "SecurePass123!",
           },
           firstName: {
-            type: 'string',
-            example: 'John',
+            type: "string",
+            example: "John",
           },
           lastName: {
-            type: 'string',
-            example: 'Doe',
+            type: "string",
+            example: "Doe",
           },
         },
       },
     }),
     ApiResponse({
       status: 201,
-      description: 'User successfully registered',
+      description: "User successfully registered",
       schema: {
-        type: 'object',
+        type: "object",
         properties: {
           message: {
-            type: 'string',
-            example: 'User registered successfully',
+            type: "string",
+            example: "User registered successfully",
           },
           data: {
-            type: 'object',
+            type: "object",
             properties: {
-              id: { type: 'string', example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' },
-              email: { type: 'string', example: 'user@example.com' },
-              firstName: { type: 'string', example: 'John' },
-              lastName: { type: 'string', example: 'Doe' },
-              createdAt: { type: 'string', format: 'date-time' },
+              id: {
+                type: "string",
+                example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+              },
+              email: { type: "string", example: "user@example.com" },
+              firstName: { type: "string", example: "John" },
+              lastName: { type: "string", example: "Doe" },
+              createdAt: { type: "string", format: "date-time" },
             },
           },
         },
       },
     }),
     ApiBadRequestResponse({
-      description: 'Invalid input data',
+      description: "Invalid input data",
       schema: {
-        type: 'object',
+        type: "object",
         properties: {
-          statusCode: { type: 'number', example: 400 },
-          message: { type: 'string', example: 'Validation failed' },
-          error: { type: 'string', example: 'Bad Request' },
+          statusCode: { type: "number", example: 400 },
+          message: { type: "string", example: "Validation failed" },
+          error: { type: "string", example: "Bad Request" },
         },
       },
     }),
     ApiConflictResponse({
-      description: 'User already exists',
+      description: "User already exists",
       schema: {
-        type: 'object',
+        type: "object",
         properties: {
-          statusCode: { type: 'number', example: 409 },
-          message: { type: 'string', example: 'User with this email already exists' },
-          error: { type: 'string', example: 'Conflict' },
+          statusCode: { type: "number", example: 409 },
+          message: {
+            type: "string",
+            example: "User with this email already exists",
+          },
+          error: { type: "string", example: "Conflict" },
         },
       },
     }),
@@ -97,72 +103,75 @@ export function DocsSignup() {
 export function DocsLogin() {
   return applyDecorators(
     ApiOperation({
-      summary: 'Login user',
-      description: 'Authenticate user and receive JWT token',
+      summary: "Login user",
+      description: "Authenticate user and receive JWT token",
     }),
     ApiBody({
       schema: {
-        type: 'object',
-        required: ['email', 'password'],
+        type: "object",
+        required: ["email", "password"],
         properties: {
           email: {
-            type: 'string',
-            format: 'email',
-            example: 'user@example.com',
+            type: "string",
+            format: "email",
+            example: "user@example.com",
           },
           password: {
-            type: 'string',
-            example: 'SecurePass123!',
+            type: "string",
+            example: "SecurePass123!",
           },
         },
       },
     }),
     ApiResponse({
       status: 200,
-      description: 'Login successful',
+      description: "Login successful",
       schema: {
-        type: 'object',
+        type: "object",
         properties: {
           message: {
-            type: 'string',
-            example: 'Login successful',
+            type: "string",
+            example: "Login successful",
           },
           data: {
-            type: 'object',
+            type: "object",
             properties: {
-              id: { type: 'string', example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' },
-              email: { type: 'string', example: 'user@example.com' },
-              firstName: { type: 'string', example: 'John' },
-              lastName: { type: 'string', example: 'Doe' },
-              token: {
-                type: 'string',
-                example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+              id: {
+                type: "string",
+                example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
               },
-              createdAt: { type: 'string', format: 'date-time' },
+              email: { type: "string", example: "user@example.com" },
+              firstName: { type: "string", example: "John" },
+              lastName: { type: "string", example: "Doe" },
+              token: {
+                type: "string",
+                example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+              },
+              createdAt: { type: "string", format: "date-time" },
             },
           },
         },
       },
     }),
     ApiBadRequestResponse({
-      description: 'Invalid input data',
+      description: "Invalid input data",
       schema: {
-        type: 'object',
+        type: "object",
         properties: {
-          statusCode: { type: 'number', example: 400 },
-          message: { type: 'string', example: 'Validation failed' },
-          error: { type: 'string', example: 'Bad Request' },
+          statusCode: { type: "number", example: 400 },
+          message: { type: "string", example: "Validation failed" },
+          error: { type: "string", example: "Bad Request" },
         },
       },
     }),
     ApiUnauthorizedResponse({
-      description: 'Invalid credentials',
+      description: "Invalid credentials",
       schema: {
-        type: 'object',
+        type: "object",
         properties: {
-          statusCode: { type: 'number', example: 401 },
-          message: { type: 'string', example: 'Invalid credentials' },
-          error: { type: 'string', example: 'Unauthorized' },
+          statusCode: { type: "number", example: 401 },
+          message: { type: "string", example: "Invalid credentials" },
+          error: { type: "string", example: "Unauthorized" },
         },
       },
     }),

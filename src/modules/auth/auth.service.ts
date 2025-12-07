@@ -1,12 +1,21 @@
-import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
-import { User, UserDocument } from './user.schema';
-import { SignupDto, LoginDto, AuthResponseDto, LoginResponseDto } from './dto/auth.dto';
-import { ApiResponse } from '../../common';
-import * as sysMsg from '../../constants/system.messages';
+import {
+  Injectable,
+  ConflictException,
+  UnauthorizedException,
+} from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
+import { JwtService } from "@nestjs/jwt";
+import * as bcrypt from "bcrypt";
+import { User, UserDocument } from "./user.schema";
+import {
+  SignupDto,
+  LoginDto,
+  AuthResponseDto,
+  LoginResponseDto,
+} from "./dto/auth.dto";
+import { ApiResponse } from "../../common";
+import * as sysMsg from "../../constants/system.messages";
 
 @Injectable()
 export class AuthService {
@@ -16,13 +25,15 @@ export class AuthService {
   ) {}
 
   async signup(signupDto: SignupDto): Promise<ApiResponse<AuthResponseDto>> {
-    const existingUser = await this.userModel.findOne({ email: signupDto.email });
+    const existingUser = await this.userModel.findOne({
+      email: signupDto.email,
+    });
     if (existingUser) {
       throw new ConflictException(sysMsg.USER_ALREADY_EXISTS);
     }
 
     const hashedPassword = await bcrypt.hash(signupDto.password, 10);
-    
+
     const user = await this.userModel.create({
       ...signupDto,
       password: hashedPassword,
@@ -40,7 +51,10 @@ export class AuthService {
       throw new UnauthorizedException(sysMsg.INVALID_CREDENTIALS);
     }
 
-    const isPasswordValid = await bcrypt.compare(loginDto.password, user.password);
+    const isPasswordValid = await bcrypt.compare(
+      loginDto.password,
+      user.password,
+    );
     if (!isPasswordValid) {
       throw new UnauthorizedException(sysMsg.INVALID_CREDENTIALS);
     }

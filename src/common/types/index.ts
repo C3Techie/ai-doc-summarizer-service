@@ -15,7 +15,7 @@ export interface ExtractedMetadata {
   currency?: string;
   vendorName?: string;
   vendorAddress?: string;
-  
+
   // CV metadata
   fullName?: string;
   email?: string;
@@ -23,7 +23,7 @@ export interface ExtractedMetadata {
   education?: string[];
   experience?: string[];
   skills?: string[];
-  
+
   // General metadata
   date?: string;
   author?: string;
@@ -31,7 +31,7 @@ export interface ExtractedMetadata {
   recipient?: string;
   subject?: string;
   keywords?: string[];
-  
+
   // Allow additional custom fields
   [key: string]: string | number | boolean | string[] | undefined;
 }

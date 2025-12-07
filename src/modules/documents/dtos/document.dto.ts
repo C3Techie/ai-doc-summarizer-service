@@ -1,14 +1,14 @@
-import { IsNotEmpty, IsString, IsOptional } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsOptional } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 /**
  * DTO for uploading a document
  */
 export class UploadDocumentDto {
   @ApiProperty({
-    type: 'string',
-    format: 'binary',
-    description: 'The document file (PDF or DOCX, max 5MB)',
+    type: "string",
+    format: "binary",
+    description: "The document file (PDF or DOCX, max 5MB)",
   })
   file: Express.Multer.File;
 }
@@ -18,7 +18,7 @@ export class UploadDocumentDto {
  */
 export class AnalyzeDocumentDto {
   @ApiPropertyOptional({
-    description: 'Optional: Force re-analysis even if already completed',
+    description: "Optional: Force re-analysis even if already completed",
     example: false,
   })
   @IsOptional()
@@ -30,7 +30,7 @@ export class AnalyzeDocumentDto {
  */
 export class ListDocumentsQueryDto {
   @ApiPropertyOptional({
-    description: 'Page number',
+    description: "Page number",
     example: 1,
     default: 1,
   })
@@ -38,7 +38,7 @@ export class ListDocumentsQueryDto {
   page?: number;
 
   @ApiPropertyOptional({
-    description: 'Number of documents per page',
+    description: "Number of documents per page",
     example: 20,
     default: 20,
   })
@@ -46,16 +46,16 @@ export class ListDocumentsQueryDto {
   limit?: number;
 
   @ApiPropertyOptional({
-    description: 'Filter by analysis status',
-    enum: ['PENDING', 'ANALYZING', 'COMPLETED', 'FAILED'],
+    description: "Filter by analysis status",
+    enum: ["PENDING", "ANALYZING", "COMPLETED", "FAILED"],
   })
   @IsOptional()
   @IsString()
   analysisStatus?: string;
 
   @ApiPropertyOptional({
-    description: 'Filter by document type',
-    enum: ['invoice', 'CV', 'report', 'letter', 'contract', 'article', 'other'],
+    description: "Filter by document type",
+    enum: ["invoice", "CV", "report", "letter", "contract", "article", "other"],
   })
   @IsOptional()
   @IsString()

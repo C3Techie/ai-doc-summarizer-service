@@ -3,10 +3,10 @@ import {
   UnsupportedMediaTypeException,
   InternalServerErrorException,
   Logger,
-} from '@nestjs/common';
-import * as pdf from 'pdf-parse';
-import * as mammoth from 'mammoth';
-import * as sysMsg from '../../constants/system.messages';
+} from "@nestjs/common";
+import * as pdf from "pdf-parse";
+import * as mammoth from "mammoth";
+import * as sysMsg from "../../constants/system.messages";
 
 /**
  * Service for extracting text from various document formats
@@ -24,11 +24,11 @@ export class TextExtractionService {
     mimetype: string,
     filename: string,
   ): Promise<string> {
-    if (mimetype === 'application/pdf') {
+    if (mimetype === "application/pdf") {
       return this.extractTextFromPdf(fileBuffer, filename);
     } else if (
       mimetype ===
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     ) {
       return this.extractTextFromDocx(fileBuffer, filename);
     } else {
@@ -39,7 +39,10 @@ export class TextExtractionService {
   /**
    * Extracts text from a PDF buffer
    */
-  private async extractTextFromPdf(dataBuffer: Buffer, filename: string): Promise<string> {
+  private async extractTextFromPdf(
+    dataBuffer: Buffer,
+    filename: string,
+  ): Promise<string> {
     try {
       const data = await pdf(dataBuffer);
       this.logger.log(`${sysMsg.TEXT_EXTRACTION_SUCCESS} (PDF): ${filename}`);
@@ -48,16 +51,17 @@ export class TextExtractionService {
       this.logger.error(
         `${sysMsg.TEXT_EXTRACTION_PDF_FAILED}: ${error.message}`,
       );
-      throw new InternalServerErrorException(
-        sysMsg.TEXT_EXTRACTION_PDF_FAILED,
-      );
+      throw new InternalServerErrorException(sysMsg.TEXT_EXTRACTION_PDF_FAILED);
     }
   }
 
   /**
    * Extracts text from a DOCX buffer
    */
-  private async extractTextFromDocx(dataBuffer: Buffer, filename: string): Promise<string> {
+  private async extractTextFromDocx(
+    dataBuffer: Buffer,
+    filename: string,
+  ): Promise<string> {
     try {
       const result = await mammoth.extractRawText({ buffer: dataBuffer });
       this.logger.log(`${sysMsg.TEXT_EXTRACTION_SUCCESS} (DOCX): ${filename}`);
